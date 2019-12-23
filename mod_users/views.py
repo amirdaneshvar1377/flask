@@ -15,6 +15,7 @@ def register():
             error_msg = 'Password and Confirm Password does not match'
             form.password.errors.append(error_msg)
             form.password_confirm.errors.append(error_msg)
+            return render_template('users/register.html', form=form)
         new_user = User()
         new_user.full_name = form.full_name.data
         new_user.email = form.email.data

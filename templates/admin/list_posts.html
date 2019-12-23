@@ -1,0 +1,24 @@
+{% extends 'admin/base.html' %}
+
+{% block title%}Post List - Admin Dashboard {% endblock %}
+
+
+{% block page_content %}
+<table>
+    <caption>Posts</caption>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Ttile</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for post in posts %}
+      <tr>
+        <td data-label="ID">{{ post.id }}</td>
+        <td data-label="Title">{{ post.title }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

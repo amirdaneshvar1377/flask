@@ -11,6 +11,7 @@ class Category(db.Model):
     name = db.Column(db.String(128), nullable=False, unique=True)
     description = db.Column(db.String(256), nullable=True, unique=False)
     slug = db.Column(db.String(128), nullable=False, unique=True)
+    posts = db.relationship('Post', secondary=posts_categories, back_populates='categories')
 
 
 class Post(db.Model):
@@ -20,3 +21,4 @@ class Post(db.Model):
     summary = db.Column(db.String(256), nullable=True, unique=False)
     content = db.Column(db.TEXT, nullable=False, unique=False)
     slug = db.Column(db.String(128), nullable=False, unique=True)
+    categories = db.relationship('Category', secondary=posts_categories, back_populates='posts')

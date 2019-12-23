@@ -1,0 +1,18 @@
+{% extends  'base.html' %}
+
+{% block content %}
+{% include 'admin/_includes/navigation.html' %}
+{% with messages = get_flashed_messages(True) %}
+            {% if messages %}
+                <div class="row">
+                             <div class="card {{ messages[0][0] }}">
+                             <div class="section">
+                                 <p>{{ messages[0][1] }}</p>
+                             </div>
+                             </div>
+                        </div>
+            {% endif %}
+        {% endwith %}
+{% block page_content %}
+{% endblock %}
+{% endblock %}

@@ -1,24 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'admin/base.html' %}
 
-{% block title %}
-Register
-{% endblock %}
+{% block title %}Create User - Admin Dashboard{% endblock %}
 
-{% block content %}
+{% block page_content %}
 <h1>Register</h1>
-    <form action="{{ url_for('users.register') }}" method="post">
-    {% with messages = get_flashed_messages(True) %}
-            {% if messages %}
-                <div class="row">
-                             <div class="card {{ messages[0][0] }}">
-                             <div class="section">
-                                 <p>{{ messages[0][1] }}</p>
-                             </div>
-                             </div>
-                        </div>
-            {% endif %}
-        {% endwith %}
 
+<form action="{{ url_for('admin.post_create_user') }}" method="post">
         {{ form.hidden_tag() }}
         Full Name : {{ form.full_name }} <br/>
         {% if form.full_name.errors %}
