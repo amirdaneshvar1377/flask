@@ -8,7 +8,11 @@ def index():
     return render_template('blog/index.html', posts=posts)
 
 
+
+
 @blog.route('/<string:slug>/')
 def single_post(slug):
     post = Post.query.filter(Post.slug == slug).first_or_404()
-    return post.title
+    return render_template('blog/single_post.html', post=post)
+
+

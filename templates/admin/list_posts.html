@@ -10,13 +10,17 @@
       <tr>
         <th>ID</th>
         <th>Ttile</th>
+          <th>Actions</th>
       </tr>
     </thead>
     <tbody>
         {% for post in posts %}
       <tr>
         <td data-label="ID">{{ post.id }}</td>
-        <td data-label="Title">{{ post.title }}</td>
+          <td data-label="Title"><a href="{{ url_for('blog.single_post', slug=post.slug) }}"> {{ post.title }}</a></td>
+        <td data-label="Actions"><a href="{{ url_for('admin.delete_post', post_id=post.id) }}" class="button">Delete</a> </td>
+        <td data-label="Actions"><a href="{{ url_for('admin.modify_post', post_id=post.id) }}" class="button">Modify</a> </td>
+
       </tr>
       {% endfor %}
     </tbody>

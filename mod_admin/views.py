@@ -3,8 +3,8 @@ from sqlalchemy.exc import IntegrityError
 from app import db
 from flask import (abort, flash, redirect, render_template, request, session,
                    url_for)
-from mod_blog.forms import CreatePostForm
-from mod_blog.models import Post
+from mod_blog.forms import CreatePostForm, ModifyPostForm, CategoryForm, ModifyCategoryForm
+from mod_blog.models import Post ,Category
 from mod_users.forms import LoginForm, RegisterForm
 from mod_users.models import User
 
@@ -56,6 +56,8 @@ def logout():
 @admin_only_view
 def create_post():
     form = CreatePostForm(request.form)
+    categories = Category.query.order_by(Category.id.asc()).all()
+    form.categories.choices = [(category.id, category.name) for category in categories]
     if request.method == 'POST':
         if not form.validate_on_submit():
             return("1")
@@ -71,6 +73,7 @@ def create_post():
             return redirect(url_for('admin.index'))
         except IntegrityError:
             db.session.rollback()
+            flash("Duplicated Slug.")
     return render_template('admin/create_post.html', form=form)
 
 
@@ -111,6 +114,100 @@ def post_create_user():
 def list_posts():
     posts = Post.query.order_by(Post.id.desc()).all()
     return render_template('admin/list_posts.html', posts=posts)
+
+
+@admin.route('posts/delete/<int:post_id>/', methods=['GET'])
+@admin_only_view
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    db.session.delete(post)
+    db.session.commit()
+    flash("Post Deleted.")
+    return redirect(url_for(('admin.list_posts')))
+
+
+@admin.route('/posts/modify/<int:post_id>', methods=['GET', 'POST'])
+@admin_only_view
+def modify_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    form = ModifyPostForm(obj=post)
+    categories = Category.query.order_by(Category.id.asc()).all()
+    form.categories.choices = [(category.id, category.name) for category in categories]
+    if request.method == 'POST':
+        if not form.validate_on_submit():
+            return render_template("admin/modify_post.html", form=form, post=post)
+        post.title = form.title.data
+        post.content = form.content.data
+        post.slug = form.slug.data
+        post.summary = form.summary.data
+        try:
+            db.session.commit()
+            flash("Post Modified")
+        except IntegrityError:
+            db.session.rollback()
+            flash("Duplicated Slug.")
+    return render_template("admin/modify_post.html", form=form, post=post)
+
+
+
+@admin.route('/categories/new/', methods=['GET', 'POST'])
+@admin_only_view
+def create_category():
+    form = CategoryForm(request.form)
+    if request.method == 'POST':
+        if not form.validate_on_submit():
+            return("1")
+        new_cat = Category()
+        new_cat.name = form.name.data
+        new_cat.slug = form.slug.data
+        new_cat.description = form.description.data
+        try:
+            db.session.add(new_cat)
+            db.session.commit()
+            flash('Category Created!')
+            return redirect(url_for('admin.index'))
+        except IntegrityError:
+            db.session.rollback()
+            flash("Duplicated Slug.")
+    return render_template('admin/create_category.html', form=form)
+
+
+@admin.route('/categories/', methods=['GET'])
+@admin_only_view
+def list_categories():
+    categories = Category.query.order_by(Category.id.desc()).all()
+    return render_template('admin/list_categoreis.html', categories=categories)
+
+
+
+@admin.route('categories/delete/<int:category_id>/', methods=['GET'])
+@admin_only_view
+def delete_category(category_id):
+    category = Category.query.get_or_404(category_id)
+    db.session.delete(category)
+    db.session.commit()
+    flash("Category Deleted.")
+    return redirect(url_for(('admin.list_categories')))
+
+
+@admin.route('/categories/modify/<int:category_id>', methods=['GET', 'POST'])
+@admin_only_view
+def modify_category(category_id):
+    category = Category.query.get_or_404(category_id)
+    form = ModifyCategoryForm(obj=category)
+    if request.method == 'POST':
+        if not form.validate_on_submit():
+            return render_template("admin/modify_category.html", form=form, category=category)
+        category.name = form.name.data
+        category.slug = form.slug.data
+        category.description = form.description.data
+        try:
+            db.session.commit()
+            flash("Category Modified")
+        except IntegrityError:
+            db.session.rollback()
+            flash("Duplicated Slug.")
+    return render_template("admin/modify_category.html", form=form, category=category)
 
 
 @admin.route('/users/',methods=['GET'])

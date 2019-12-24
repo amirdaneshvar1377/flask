@@ -14,3 +14,5 @@ class RegisterForm(FlaskForm):
     email = EmailField(validators=[DataRequired()])
     password = PasswordField(validators=[DataRequired()])
     password_confirm = PasswordField(validators=[DataRequired()])
+
+
