@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms.fields.html5 import EmailField
-from wtforms import PasswordField, StringField
+from wtforms import PasswordField, StringField, TextField
 from wtforms.validators import DataRequired
 
 
@@ -16,3 +16,5 @@ class RegisterForm(FlaskForm):
     password_confirm = PasswordField(validators=[DataRequired()])
 
 
+class SearchForm(FlaskForm):
+    search_query = TextField(validators=[DataRequired])

@@ -1,12 +1,16 @@
 from sqlalchemy.exc import IntegrityError
 
 from app import db
+import uuid
 from flask import (abort, flash, redirect, render_template, request, session,
                    url_for)
+from werkzeug.utils import secure_filename
 from mod_blog.forms import CreatePostForm, ModifyPostForm, CategoryForm, ModifyCategoryForm
 from mod_blog.models import Post ,Category
 from mod_users.forms import LoginForm, RegisterForm
 from mod_users.models import User
+from mod_upload.forms import FileUploadForm
+from mod_upload.models import File
 
 from . import admin
 from .utils import admin_only_view
@@ -60,12 +64,13 @@ def create_post():
     form.categories.choices = [(category.id, category.name) for category in categories]
     if request.method == 'POST':
         if not form.validate_on_submit():
-            return("1")
+            return("form validation Error!")
         new_post = Post()
         new_post.title = form.title.data
         new_post.content = form.content.data
         new_post.slug = form.slug.data
         new_post.summary = form.summary.data
+        new_post.categories = [Category.query.get(category_id) for category_id in form.categories.data]
         try:
             db.session.add(new_post)
             db.session.commit()
@@ -133,6 +138,8 @@ def modify_post(post_id):
     form = ModifyPostForm(obj=post)
     categories = Category.query.order_by(Category.id.asc()).all()
     form.categories.choices = [(category.id, category.name) for category in categories]
+    if request.method != 'POST':
+        form.categories.data = [category.id for category in post.categories]
     if request.method == 'POST':
         if not form.validate_on_submit():
             return render_template("admin/modify_post.html", form=form, post=post)
@@ -140,6 +147,7 @@ def modify_post(post_id):
         post.content = form.content.data
         post.slug = form.slug.data
         post.summary = form.summary.data
+        post.categories = [Category.query.get(category_id) for category_id in form.categories.data]
         try:
             db.session.commit()
             flash("Post Modified")
@@ -215,4 +223,24 @@ def modify_category(category_id):
 def list_users():
     users = User.query.order_by(User.id.desc()).all()
     return render_template('admin/list_users.html', users=users)
-    
+
+
+@admin.route('/uploads/', methods=['GET','POST'])
+@admin_only_view
+def upload_file():
+    form = FileUploadForm()
+    if request.method == 'POST':
+        if not form.validate_on_submit():
+            return "1"
+        filename = f'{uuid.uuid1()}.{secure_filename(form.file.data.filename)}'
+        new_file = File()
+        new_file.filename = filename
+        try:
+            db.session.add(new_file)
+            db.session.commit()
+            form.file.data.save(f'static/uploads/{filename}')
+            filename =  f"uploads/{filename}"
+            flash(f"File Uploaded on {url_for('static', filename=filename , _external=True)}")
+        except IntegrityError:
+            flash("Upload Failed")
+    return render_template("admin/upload_file.html", form=form)

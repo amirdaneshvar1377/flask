@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField, TextField, SelectMultipleField
 from wtforms.validators import DataRequired
+from utils.forms import MultipleCheckboxField
 
 
 class CreatePostForm(FlaskForm):
@@ -8,7 +9,7 @@ class CreatePostForm(FlaskForm):
     summary = TextAreaField()
     content = TextAreaField(validators=[DataRequired()])
     slug = TextField(validators=[DataRequired()])
-    categories = SelectMultipleField()
+    categories = MultipleCheckboxField(coerce=int)
 
 
 class ModifyPostForm(FlaskForm):
@@ -16,7 +17,7 @@ class ModifyPostForm(FlaskForm):
     summary = TextAreaField()
     content = TextAreaField(validators=[DataRequired()])
     slug = TextField(validators=[DataRequired()])
-    categories = SelectMultipleField()
+    categories = MultipleCheckboxField(coerce=int)
 
 
 class CategoryForm(FlaskForm):
@@ -28,3 +29,7 @@ class ModifyCategoryForm(FlaskForm):
     name = TextField(validators=[DataRequired()])
     slug = TextField(validators=[DataRequired()])
     description = TextAreaField()
+
+
+class SearchForm(FlaskForm):
+    search_query = TextField(validators=[DataRequired])
